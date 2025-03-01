@@ -1,0 +1,5 @@
+original_dataset = "dataset_project/Eye-tracking Output"
+participant_dataset = "clean_dataset"
+average_paths_folder = "calculated_average_paths"
+experiment_statistics_file = "experiment_statistics.csv"
+metadata_participants = "Metadata_Participants.csv"
