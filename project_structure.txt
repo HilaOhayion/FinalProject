@@ -1,0 +1,47 @@
+FinalProject/
+├─ calculated_average_paths/
+│  ├─ AveragePath_StimA.csv
+│  ├─ AveragePath_StimB.csv
+│  └─ ...
+│
+├─ clean_dataset/
+│  ├─ Participant_1.csv
+│  ├─ Participant_2.csv
+│  ├─ ...
+│  └─ Participant_59.csv
+│
+├─ dataset_project/
+│  └─ Eye-tracking Output/
+│      └─ put here the original dataset files.txt
+│
+├─ output/
+│  ├─ Figure_1_Avg_Gaze_Deviation.png
+│  ├─ Figure_2_Avg_Fixation_Deviation.png
+│  ├─ ...
+│  └─ Figure_9_Density_Plot_Saccade_Frequency.png
+│
+├─ src/
+│  ├─ calculate_gaze_paths.py
+│  ├─ data_analysis.py
+│  ├─ data_cleanup.py
+│  ├─ data_visualization.py
+│  ├─ dataset_file_cleanup.py
+│  └─ load_data.py
+│
+├─ tests/
+│  ├─ test_fixtures.py
+│  ├─ test_calculate_gaze_paths.py
+│  ├─ test_data_analysis.py
+│  ├─ test_data_cleanup.py
+│  ├─ test_data_visualization.py
+│  ├─ test_dataset_file_cleanup.py
+│  ├─ test_main_create_files_for_analysis.py
+│  └─ test_main_analyze_data.py
+│
+├─ MAIN_create_files_for_analysis.py
+├─ MAIN_analyze_data.py
+├─ experiment_statistics.csv
+├─ Metadata_Participants.csv
+├─ pyproject.toml
+├─ written_report.pdf
+└─ README.md
