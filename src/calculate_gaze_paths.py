@@ -5,7 +5,17 @@ import math
 from src.load_data import *
 
 def create_average_paths_files():
-    """Compute the average gaze path for each stimulus and save as a new file."""
+    """
+    Generate an average gaze path file (CSV) for each unique stimulus.
+
+    Returns:
+      None. CSV files are written to 'calculated_average_paths'.
+
+    Notes:
+      - If no data is found for a given stimulus, that stimulus is skipped.
+      - The function relies on 'SnappedTime' existing in participant files (i.e., 
+        after cleaning).    
+    """
     os.makedirs(average_paths_folder, exist_ok=True)
     experiment_stats = pd.read_csv(experiment_statistics_file)
     
@@ -54,7 +64,10 @@ def create_average_paths_files():
 def rename_average_gaze_columns(avg_df):
     """
     Rename columns to make calculations between these files and the participant files easier 
-    in the following calculations    
+    in the following calculations.
+
+    Parameters:
+      avg_df (pd.DataFrame): DataFrame containing the columns to rename.
     """
     avg_df.rename(columns={
         'Point of Regard Right X [px]': 'Avg Right X',
@@ -64,7 +77,14 @@ def rename_average_gaze_columns(avg_df):
     }, inplace=True)
 
 def force_columns_to_numeric(avg_df):
-    """forcing the results to be numeric to avoid type errors in the future"""
+    """
+    Forces average gaze columns to be numeric types (float). 
+    This helps avoid type errors in subsequent operations.
+
+    Parameters:
+      avg_df (pd.DataFrame): DataFrame containing 'Avg Right X/Y' 
+                             and 'Avg Left X/Y' columns.
+    """    
     avg_df['Avg Right X'] = pd.to_numeric(avg_df['Avg Right X'], errors='coerce')
     avg_df['Avg Right Y'] = pd.to_numeric(avg_df['Avg Right Y'], errors='coerce')
     avg_df['Avg Left X'] = pd.to_numeric(avg_df['Avg Left X'], errors='coerce')
@@ -72,11 +92,13 @@ def force_columns_to_numeric(avg_df):
 
 def calculate_gaze_deviation():
     """
-    Calculates the distance of the participant's gaze from the average path for the stimulus for each 
-    datapoint recorded. It then writes the results in three new columns in the participant files. 
-    One column for the distance of the right eye, one for the distance of the left eye, and one for overall distance.
-    The overall distance is calculated as either the average of both eyes or, if one of them is 0, 
-    as equal to the one with the data.
+    Calculates how far each participant's gaze is from the average path for each stimulus.
+    It calculates for the right eye, left eye and overall.
+
+    Notes:
+      - If 'AvgPath' file for a given stimulus doesn't exist, 
+        the code prints a warning and skips it.
+      - If 'Category' is 'blink', that row is skipped.
     """
     # Get list of all participant files
     participant_files = [os.path.join(participant_dataset, f) for f in os.listdir(participant_dataset) 
@@ -186,7 +208,23 @@ def calculate_gaze_deviation():
             continue
 
 def calculate_distance_per_eye(row, x_coordinate_column, y_coordinate_column,avg_x,avg_y,avg_data):
-    """Calculate Euclidean distance for each eye."""
+    """
+    Computes the Euclidean distance between the participant's coordinates 
+    (for one eye) and the average path's coordinates at a given time.
+
+    Parameters:
+      row (pd.Series): A row from the participant DataFrame (one time step).
+      x_coordinate_column (str): The column name for the participant's X coordinate.
+      y_coordinate_column (str): The column name for the participant's Y coordinate.
+      avg_x (str): The key name in 'avg_data' for the average X coordinate.
+      avg_y (str): The key name in 'avg_data' for the average Y coordinate.
+      avg_data (dict): Contains 'right_x', 'right_y', 'left_x', 'left_y' 
+                       from the average path, indexed by snapped time.
+
+    Returns:
+      float: The Euclidean distance. Returns 0 if 
+             coordinates are NaN or both are zero.
+    """    
     eye_distance = 0
     if not (pd.isna(row[x_coordinate_column]) or pd.isna(row[y_coordinate_column])):
         # Skip if coordinates are all zeros

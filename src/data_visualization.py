@@ -6,7 +6,14 @@ from src.load_data import *
 
 def load_and_split_data_by_class():
     """
-    Loads the CSV data, returns the full DataFrame along with ASD/TD subsets.
+    Loads participant data from 'Metadata_Participants.csv' 
+    and separates rows by 'Class' ("ASD" vs. "TD").
+
+    Returns:
+      tuple (df, df_asd, df_td):
+        df (pd.DataFrame): The full metadata DataFrame.
+        df_asd (pd.DataFrame): Rows where Class == "ASD".
+        df_td (pd.DataFrame): Rows where Class == "TD".
     """
     df = pd.read_csv(metadata_participants)  
     df_asd = df[df["Class"] == "ASD"]
@@ -24,13 +31,17 @@ def compare_all_metrics(df_asd, df_td):
       - Saccade_Frequency
       - Avg_Saccade_Duration
 
-    Returns dict: {
-        metric_name: {
-            "ASD_mean": float,
-            "TD_mean": float,
-            "p_value": float
+    Parameters:
+      df_asd (pd.DataFrame): Rows from metadata where Class == "ASD"
+      df_td (pd.DataFrame): Rows from metadata where Class == "TD"
+
+    Returns:
+      dict: A dictionary keyed by metric name, each value is another dict with:
+        {
+          "ASD_mean": float,
+          "TD_mean":  float,
+          "p_value":  float
         }
-    }
     """
     metrics = [
         "Avg_Gaze_Deviation",
@@ -63,6 +74,12 @@ def get_significance_stars(p_val):
       - p < 0.01: '**'
       - p < 0.05: '*'
       - otherwise: ''
+    
+    Parameters:
+      p_val (float): The p-value to interpret.
+    
+    Returns:
+      str: The star label.
     """
     if p_val < 0.001:
         return "***"
@@ -75,9 +92,14 @@ def get_significance_stars(p_val):
 
 def plot_individual_boxplots(df_asd, df_td, results):
     """
-    Plots individual box plots (one figure per metric) with:
-      - ASD in lightskyblue, TD in palegreen
-      - A bracket + asterisk(s) if p<0.05
+    Generates a separate boxplot figure for each metric in 'results',
+    comparing ASD vs. TD distributions. Significant metrics receive 
+    a star label above a bracket.
+
+    Parameters:
+      df_asd (pd.DataFrame): ASD subset.
+      df_td (pd.DataFrame): TD subset.
+      results (dict): Output from 'compare_all_metrics'.
     """
     for metric, stats in results.items():
         asd_vals = df_asd[metric].dropna()
@@ -115,11 +137,16 @@ def plot_individual_boxplots(df_asd, df_td, results):
 
 def plot_significant_subplots(df_asd, df_td, results):
     """
-    Creates a single figure with side-by-side box plots (subplots) 
-    for all metrics where p<0.05.
+    Creates a single figure with multiple subplots (side-by-side),
+    only for metrics where p<0.05 in 'results'.
 
-    Each subplot shows ASD vs. TD in lightskyblue/palegreen, 
-    with an appropriate bracket and asterisk(s) if p<0.05.
+    Each subplot is a boxplot comparing ASD vs. TD. 
+    If a metric is not significant (p>=0.05), it is excluded.
+
+    Parameters:
+      df_asd (pd.DataFrame): ASD subset.
+      df_td (pd.DataFrame): TD subset.
+      results (dict): The result of compare_all_metrics.
     """
     # Identify which metrics are significant at p<0.05
     sig_metrics = [m for m, st in results.items() if st["p_value"] < 0.05]
@@ -167,11 +194,13 @@ def plot_significant_subplots(df_asd, df_td, results):
 
 def plot_distribution_kde_by_group(df, metric, title=None):
     """
-    Creates a density (KDE) plot for a given metric, split by ASD vs. TD.
-    Args:
-        df (pd.DataFrame): Dataset with columns for metric and a 'Class' column ("ASD"/"TD").
-        metric (str): The metric (column name) to plot.
-        title (str): Optional custom title.
+    Plots a KDE (kernel density estimate) for 'metric', coloring by ASD vs. TD.
+    
+    Parameters:
+    df (pd.DataFrame): A DataFrame containing the metric column and a 'Class' column 
+                         (where values are 'ASD' or 'TD').
+    metric (str): The name of the numeric column to plot.
+    title (str, optional): Custom plot title.
     """
     plt.figure(figsize=(10, 6))
     custom_palette = {"ASD": "lightskyblue", "TD": "palegreen"}
